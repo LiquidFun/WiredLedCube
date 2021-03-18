@@ -14,6 +14,7 @@ namespace T27
         static void setup();
 
         void activate_level(int z_active) const;
+        void activate_all_levels() const;
 
     public:
         bool &operator()(int x, int y, int z)

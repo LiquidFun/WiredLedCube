@@ -19,7 +19,9 @@ void setup()
         {
             for (int z = -1; z <= 1; ++z)
             {
-                bool led_on = (random(2) == 1);
+                // bool led_on = (random(2) == 1);
+                // bool led_on = (x + y + z + 100) % 2 == 0;
+                bool led_on = true;
                 T27::app(x, y, z) = led_on;
             }
         }
@@ -28,11 +30,7 @@ void setup()
 
 void loop()
 {
-    for (int z = -1; z <= 1; ++z)
-    {
-        T27::app.activate_level(z);
-        delay(10);
-    }
+    T27::app.activate_all_levels()
 }
 
 int main()

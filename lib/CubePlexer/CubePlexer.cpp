@@ -30,7 +30,7 @@ namespace T27
         for (int i = 10; i <= 12; ++i)
         {
             pinMode(i, OUTPUT);
-            digitalWrite(i, LOW);
+            digitalWrite(i, HIGH);
         }
 
         for (int i = 0; i <= 8; ++i)
@@ -51,7 +51,7 @@ namespace T27
         {
             for (int y = -1; y <= 1; ++y)
             {
-                uint8_t led_state = (*this)(x, y, z_active) ? HIGH : LOW;
+                uint8_t led_state = (*this)(x, y, z_active) ? LOW : HIGH;
                 int sign_of_x = (y == 0) ? -1 : 1;// see GPIO pin layout at y=0
                 uint8_t pin = static_cast<uint8_t>(
                     (y + 1) * 3 + (sign_of_x * x + 1));
@@ -60,6 +60,14 @@ namespace T27
         }
 
         digitalWrite(11 + z_active, HIGH);
+    }
+
+    void CubePlexer::activate_all_levels() const
+    {
+        for (int z = -1; z <= 1; ++z)
+        {
+            activate_level(z);
+        }
     }
 
 } // namespace T27
