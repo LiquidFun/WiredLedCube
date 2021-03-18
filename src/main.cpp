@@ -30,7 +30,7 @@ void setup()
 
 void loop()
 {
-    T27::app.activate_all_levels()
+    T27::app.activate_all_levels();
 }
 
 int main()
