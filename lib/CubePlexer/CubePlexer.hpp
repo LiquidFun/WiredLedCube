@@ -4,8 +4,11 @@ namespace T27
 {
     class CubePlexer
     {
+    public:
+        static constexpr int N = 3;
+
     private:
-        bool led_is_active_[27]{};
+        bool led_is_active_[N * N * N]{};
 
     public:
         CubePlexer() = default;
@@ -30,7 +33,7 @@ namespace T27
     private:
         int calc_offset(int x, int y, int z) const
         {
-            return (x + 1) * 9 + (y + 1) * 3 + (z + 1);
+            return x * (N * N) + y * N + z;
         }
     }; // class CubePlexer
 
