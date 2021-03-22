@@ -55,11 +55,32 @@ namespace T27
         }
     }
 
+    namespace
+    {
+        void write_without_cli(uint8_t pin, uint8_t state)
+        {
+            uint8_t port = digitalPinToPort(pin);
+            uint8_t bit = digitalPinToBitMask(pin);
+            volatile uint8_t *reg = portOutputRegister(port);
+
+            uint8_t old_val = *reg;
+            uint8_t new_val = (state == HIGH)
+                                  ? (old_val | bit)
+                                  : (old_val & bit);
+            *reg = new_val;
+        }
+    }
+
     void CubePlexer::activate_level(int z_active) const
     {
+        uint8_t initial_SREG = SREG;
+        cli();
+
         for (int z = 0; z < CubePlexer::N; ++z)
         {
-            digitalWrite(z0 + z, LOW);
+            uint8_t pin = z0 + z;
+            uint8_t state = LOW;
+            write_without_cli(pin, state);
         }
 
         for (int y = 0; y < CubePlexer::N; ++y)
@@ -67,12 +88,16 @@ namespace T27
             for (int x = 0; x < CubePlexer::N; ++x)
             {
                 uint8_t pin = yx_to_pin[y][x];
-                uint8_t led_state = led_is_active_(x, y, z_active) ? LOW : HIGH;
-                digitalWrite(pin, led_state);
+                uint8_t state = led_is_active_(x, y, z_active) ? LOW : HIGH;
+                write_without_cli(pin, state);
             }
         }
 
-        digitalWrite(z0 + z_active, HIGH);
+        uint8_t pin = z0 + z_active;
+        uint8_t state = HIGH;
+        write_without_cli(pin, state);
+
+        SREG = initial_SREG;
     }
 
     void CubePlexer::activate_all_levels() const
