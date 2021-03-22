@@ -105,6 +105,7 @@ namespace T27
         for (int z = 0; z < CubePlexer::N; ++z)
         {
             activate_level(z);
+            delay(1);
         }
     }
 
