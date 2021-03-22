@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MultiArray.hpp"
+
 namespace T27
 {
     class CubePlexer
@@ -8,7 +10,7 @@ namespace T27
         static constexpr int N = 3;
 
     private:
-        bool led_is_active_[N * N * N]{};
+        MultiArray<bool, N, N, N> led_is_active_{};
 
     public:
         CubePlexer() = default;
@@ -22,18 +24,12 @@ namespace T27
     public:
         bool &operator()(int x, int y, int z)
         {
-            return led_is_active_[calc_offset(x, y, z)];
+            return led_is_active_.ref(x, y, z);
         }
 
         const bool &operator()(int x, int y, int z) const
         {
-            return led_is_active_[calc_offset(x, y, z)];
-        }
-
-    private:
-        int calc_offset(int x, int y, int z) const
-        {
-            return x * (N * N) + y * N + z;
+            return led_is_active_(x, y, z);
         }
     }; // class CubePlexer
 

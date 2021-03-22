@@ -67,7 +67,7 @@ namespace T27
             for (int x = 0; x < CubePlexer::N; ++x)
             {
                 uint8_t pin = yx_to_pin[y][x];
-                uint8_t led_state = (*this)(x, y, z_active) ? LOW : HIGH;
+                uint8_t led_state = led_is_active_(x, y, z_active) ? LOW : HIGH;
                 digitalWrite(pin, led_state);
             }
         }
