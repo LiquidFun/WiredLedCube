@@ -57,6 +57,7 @@ namespace T27
 
     namespace
     {
+#ifdef ARDUINO
         void write_without_cli(uint8_t pin, uint8_t state)
         {
             uint8_t port = digitalPinToPort(pin);
@@ -69,10 +70,19 @@ namespace T27
                                   : (old_val & bit);
             *reg = new_val;
         }
+#else
+        void write_without_cli(uint8_t pin, uint8_t state)
+        {
+        }
+#endif
     }
 
     void CubePlexer::activate_level(int z_active) const
     {
+#ifndef ARDUINO
+        uint8_t SREG = 0;
+#endif
+
         uint8_t initial_SREG = SREG;
         cli();
 
