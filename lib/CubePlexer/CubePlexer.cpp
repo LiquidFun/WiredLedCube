@@ -67,7 +67,7 @@ namespace T27
             uint8_t old_val = *reg;
             uint8_t new_val = (state == HIGH)
                                   ? (old_val | bit)
-                                  : (old_val & bit);
+                                  : (old_val & ~bit);
             *reg = new_val;
         }
 #else
