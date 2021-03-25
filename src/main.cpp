@@ -35,6 +35,8 @@ void loop()
     T27::app.activate_all_levels();
 }
 
+#ifndef ARDUINO
+
 int main()
 {
     setup();
@@ -43,3 +45,5 @@ int main()
         loop();
     }
 }
+
+#endif
