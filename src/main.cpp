@@ -9,6 +9,8 @@ namespace T27
 
 void setup()
 {
+    delay(2000);
+
     randomSeed(analogRead(9));
 
     T27::CubePlexer::setup();
