@@ -28,7 +28,7 @@ namespace T27
         // {0, 1, 2} ∋ x
         {0, 1, 2}, // y = 0
         {5, 4, 3}, // y = 1
-        {6, 7, 8}  // y = 2
+        {6, 7, 8}, // y = 2
     };
     // ATTENTION: above coordinate system is left-handed: eˣ × eʸ = −eᶻ
     //
