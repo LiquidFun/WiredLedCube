@@ -4,119 +4,81 @@
 
 #include <Arduino.h>
 
+#include "Pin.hpp"
+
 namespace T27
 {
-    // | GPIO idx | z |
-    // |----------|---|
-    // |       12 | 2 |
-    // |       11 | 1 |
-    // |       10 | 0 |
-    //
-    constexpr uint8_t z0 = 10;
-
-    // horizontal GPIO pattern
-    // (viewed from the top. 6 7 8 is the side closer to the USB port)
-    //
-    // | \ x | -1    0   +1 |
-    // | y \ |              |
-    // |-----|--------------|
-    // |  -1 |  0    1    2 |
-    // |   0 |  5    4    3 |
-    // |  +1 |  6    7    8 |
-    //
-    constexpr uint8_t yx_to_pin[CubePlexer::N][CubePlexer::N]{
-        // {0, 1, 2} ∋ x
-        {0, 1, 2}, // y = 0
-        {5, 4, 3}, // y = 1
-        {6, 7, 8}, // y = 2
-    };
-    // ATTENTION: above coordinate system is left-handed: eˣ × eʸ = −eᶻ
-    //
-    // ATTENTION:
-    //   * state has row-major order: (x, y, z)
-    //   * pin has col-major order: [y][x]
+    constexpr Pin CubePlexer::z_pins[CubePlexer::N];
+    constexpr Pin CubePlexer::yx_pins[CubePlexer::N][CubePlexer::N];
 
     void CubePlexer::setup()
     {
+        pinMode(LED_BUILTIN, OUTPUT);
+        digitalWrite(LED_BUILTIN, LOW);
+
         for (int z = 0; z < CubePlexer::N; ++z)
         {
-            pinMode(z0 + z, OUTPUT);
-            digitalWrite(z0 + z, HIGH);
+            const Pin &pin = z_pins[z];
+            pinMode(pin.idx(), OUTPUT);
+            digitalWrite(pin.idx(), HIGH);
         }
 
         for (int y = 0; y < CubePlexer::N; ++y)
         {
             for (int x = 0; x < CubePlexer::N; ++x)
             {
-                uint8_t pin = yx_to_pin[y][x];
-                pinMode(pin, OUTPUT);
-                digitalWrite(pin, LOW);
+                const Pin &pin = yx_pins[y][x];
+                if (pin.idx() == 0 || pin.idx() == 1)
+                {
+                    continue;
+                }
+                pinMode(pin.idx(), OUTPUT);
+                digitalWrite(pin.idx(), LOW);
             }
         }
-    }
-
-    namespace
-    {
-#ifdef ARDUINO
-        void write_without_cli(uint8_t pin, uint8_t state)
-        {
-            uint8_t port = digitalPinToPort(pin);
-            uint8_t bit = digitalPinToBitMask(pin);
-            volatile uint8_t *reg = portOutputRegister(port);
-
-            uint8_t old_val = *reg;
-            uint8_t new_val = (state == HIGH)
-                                  ? (old_val | bit)
-                                  : (old_val & ~bit);
-            *reg = new_val;
-        }
-#else
-        void write_without_cli(uint8_t pin, uint8_t state)
-        {
-        }
-#endif
     }
 
     void CubePlexer::activate_level(int z_active) const
     {
-#ifndef ARDUINO
-        uint8_t SREG = 0;
-#endif
+        constexpr uint8_t maskb_z = z_pins[0].mask() | z_pins[1].mask() | z_pins[2].mask();
+        constexpr uint8_t maskb_xyz_e = pins[8].mask() | maskb_z | pins[LED_BUILTIN].mask();
 
-        uint8_t initial_SREG = SREG;
+        constexpr uint8_t maskd_xy = 0xFFu ^ (1u << 0u) ^ (1u << 1u);
+
+        uint8_t portb_next = ports_BD_by_z[z_active][0];
+        uint8_t portd_next = ports_BD_by_z[z_active][1];
+
+        uint8_t status = SREG;
         cli();
 
-        for (int z = 0; z < CubePlexer::N; ++z)
-        {
-            uint8_t pin = z0 + z;
-            uint8_t state = LOW;
-            write_without_cli(pin, state);
-        }
+        uint8_t portb_prev = PORTB;
+        uint8_t portd_prev = PORTD;
 
-        for (int y = 0; y < CubePlexer::N; ++y)
-        {
-            for (int x = 0; x < CubePlexer::N; ++x)
-            {
-                uint8_t pin = yx_to_pin[y][x];
-                uint8_t state = led_is_active_(x, y, z_active) ? LOW : HIGH;
-                write_without_cli(pin, state);
-            }
-        }
+        PORTB = (portb_prev & ~maskb_z);
+        PORTD = (portd_prev & ~maskd_xy) | portd_next;
+        PORTB = (portb_prev & ~maskb_xyz_e) | portb_next;
 
-        uint8_t pin = z0 + z_active;
-        uint8_t state = HIGH;
-        write_without_cli(pin, state);
-
-        SREG = initial_SREG;
+        SREG = status;
     }
 
     void CubePlexer::activate_all_levels() const
     {
         for (int z = 0; z < CubePlexer::N; ++z)
         {
+            Serial.println(z);
             activate_level(z);
-            delay(1);
+            delay(1000);
         }
     }
 
+    void CubePlexer::highlight(int z_to_be_highlighted)
+    {
+        const Pin &pin = pins[LED_BUILTIN];
+        uint8_t port_offset = get_port_offset(pin.port());
+        for (int z = 0; z < N; ++z)
+        {
+            ports_BD_by_z[z][port_offset] &= ~pin.mask();
+        }
+        ports_BD_by_z[z_to_be_highlighted][port_offset] |= pin.mask();
+    }
 } // namespace T27

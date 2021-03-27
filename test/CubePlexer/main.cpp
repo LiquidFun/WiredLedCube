@@ -3,14 +3,16 @@
 
 namespace T27
 {
-    void test_pins_and_ports();
+    void test_pins();
+    void test_ports();
     void test_sizeof();
 
     int run_tests()
     {
         UNITY_BEGIN();
 
-        RUN_TEST(T27::test_pins_and_ports);
+        RUN_TEST(T27::test_pins);
+        RUN_TEST(T27::test_ports);
         RUN_TEST(T27::test_sizeof);
 
         return UNITY_END();

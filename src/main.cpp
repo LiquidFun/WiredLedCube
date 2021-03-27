@@ -11,7 +11,8 @@ void setup()
 {
     delay(2000);
 
-    randomSeed(analogRead(9));
+    Serial.begin(9600L);
+    Serial.println(__AVR_LIBC_VERSION__);
 
     T27::CubePlexer::setup();
 
@@ -21,13 +22,12 @@ void setup()
         {
             for (int z = 0; z < T27::CubePlexer::N; ++z)
             {
-                // bool led_on = (random(2) == 1);
-                // bool led_on = (x + y + z + 100) % 2 == 0;
-                bool led_on = true;
-                T27::app(x, y, z) = led_on;
+                T27::app.on(x, y, z);
             }
         }
     }
+
+    T27::app.highlight(2);
 }
 
 void loop()
