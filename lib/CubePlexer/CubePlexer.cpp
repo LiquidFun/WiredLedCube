@@ -65,9 +65,8 @@ namespace T27
     {
         for (int z = 0; z < CubePlexer::N; ++z)
         {
-            Serial.println(z);
             activate_level(z);
-            delay(1000);
+            delay(1);
         }
     }
 

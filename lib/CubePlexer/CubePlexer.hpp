@@ -59,6 +59,12 @@ namespace T27
             uint8_t port_offset = get_port_offset(pin.port());
             ports_BD_by_z[z][port_offset] &= ~pin.mask();
         }
+        bool is_on(int x, int y, int z)
+        {
+            const Pin &pin = yx_pins[y][x];
+            uint8_t port_offset = get_port_offset(pin.port());
+            return !(ports_BD_by_z[z][port_offset] & pin.mask());
+        }
         void off(int x, int y, int z)
         {
             const Pin &pin = yx_pins[y][x];
