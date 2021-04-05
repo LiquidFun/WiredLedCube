@@ -8,17 +8,14 @@
 
 namespace T27
 {
-    constexpr Pin CubePlexer::z_pins[CubePlexer::N];
-    constexpr Pin CubePlexer::yx_pins[CubePlexer::N][CubePlexer::N];
+    constexpr Pin CubePlexer::z_pins[2][CubePlexer::N];
+    constexpr Pin CubePlexer::yx_pins[2][CubePlexer::N][CubePlexer::N];
 
     void CubePlexer::setup()
     {
-        pinMode(LED_BUILTIN, OUTPUT);
-        digitalWrite(LED_BUILTIN, LOW);
-
         for (int z = 0; z < CubePlexer::N; ++z)
         {
-            const Pin &pin = z_pins[z];
+            const Pin &pin = z_to_pin(z);
             pinMode(pin.idx(), OUTPUT);
             digitalWrite(pin.idx(), HIGH);
         }
@@ -27,7 +24,7 @@ namespace T27
         {
             for (int x = 0; x < CubePlexer::N; ++x)
             {
-                const Pin &pin = yx_pins[y][x];
+                const Pin &pin = xy_to_pin(x, y);
                 if (pin.idx() == 0 || pin.idx() == 1)
                 {
                     continue;
@@ -40,8 +37,11 @@ namespace T27
 
     void CubePlexer::activate_level(int z_active) const
     {
-        constexpr uint8_t maskb_z = z_pins[0].mask() | z_pins[1].mask() | z_pins[2].mask();
-        constexpr uint8_t maskb_xyz_e = pins[8].mask() | maskb_z | pins[LED_BUILTIN].mask();
+        // TODO: precompute bitmasks once (e.g., on construction)?
+        uint8_t maskb_z = z_to_pin(0).mask() | z_to_pin(1).mask() | z_to_pin(2).mask();
+        uint8_t maskb_xyz = ((layout_ == PinLayout::v0)
+                                 ? (maskb_z | pins[8].mask())
+                                 : (maskb_z | pins[8].mask() | pins[9].mask() | pins[13].mask()));
 
         constexpr uint8_t maskd_xy = 0xFFu ^ (1u << 0u) ^ (1u << 1u);
 
@@ -56,29 +56,8 @@ namespace T27
 
         PORTB = (portb_prev & ~maskb_z);
         PORTD = (portd_prev & ~maskd_xy) | portd_next;
-        PORTB = (portb_prev & ~maskb_xyz_e) | portb_next;
+        PORTB = (portb_prev & ~maskb_xyz) | portb_next;
 
         SREG = status;
-    }
-
-    void CubePlexer::activate_all_levels() const
-    {
-        for (int z = 0; z < CubePlexer::N; ++z)
-        {
-            Serial.println(z);
-            activate_level(z);
-            delay(1000);
-        }
-    }
-
-    void CubePlexer::highlight(int z_to_be_highlighted)
-    {
-        const Pin &pin = pins[LED_BUILTIN];
-        uint8_t port_offset = get_port_offset(pin.port());
-        for (int z = 0; z < N; ++z)
-        {
-            ports_BD_by_z[z][port_offset] &= ~pin.mask();
-        }
-        ports_BD_by_z[z_to_be_highlighted][port_offset] |= pin.mask();
     }
 } // namespace T27

@@ -3,19 +3,15 @@
 
 namespace T27
 {
-    void test_avr_libc_version();
-    void test_pins();
-    void test_ports();
-    void test_sizeof();
+    void test_max();
+    void test_min();
 
     int run_tests()
     {
         UNITY_BEGIN();
 
-        RUN_TEST(T27::test_avr_libc_version);
-        RUN_TEST(T27::test_pins);
-        RUN_TEST(T27::test_ports);
-        RUN_TEST(T27::test_sizeof);
+        RUN_TEST(T27::test_min);
+        RUN_TEST(T27::test_max);
 
         return UNITY_END();
     }
