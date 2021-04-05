@@ -32,10 +32,10 @@ namespace T27
                 {
                     for (int y = 0; y < CubePlexer::N; ++y)
                     {
-                        boolean next_state = (random(0, 5) == 1);
+                        bool next_state = (random(0, 5) == 1);
                         for (int z = CubePlexer::N; z >= 1; --z)
                         {
-                            boolean curr_state = cube_.is_on(x, y, z - 1);
+                            bool curr_state = cube_.is_on(x, y, z - 1);
                             if (next_state)
                             {
                                 cube_.on(x, y, z - 1);
