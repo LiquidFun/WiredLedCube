@@ -3,10 +3,11 @@
 #include "Arduino.h"
 
 #include "CubePlexer.hpp"
+#include "IBlinkMode.hpp"
 
 namespace T27
 {
-    class MatrixMode
+    class MatrixMode : public IBlinkMode
     {
     private:
         static constexpr unsigned long next_step_interval_ = 150;
@@ -23,7 +24,7 @@ namespace T27
         }
 
     public:
-        void update()
+        virtual void update() override
         {
             if (start_time_ + next_step_interval_ < millis())
             {
