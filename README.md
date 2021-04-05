@@ -70,3 +70,13 @@ See below for key-bindings in interactive mode.
 Currently GPIO pins 0 to 8 are used for addressing the 9 columns and pins 10 to 12 are used to address the 3 layers. 
 Pins 9 and 13 are not used.
 As the 12 pins in use are not enough to create all 2^27 patterns, a 'cube-plexer' is implemented which quickly flashes each layer for 1 ms. Using this, every pattern can be created. This is hidden behind this library, so you can just write `cube.on(0, 0, 0)`, which would turn on one of the LEDs.
+
+You may change the pin layout in `src/main.cpp` to either `PinLayout::v0` or `PinLayout::v1`. 
+Currently they only differ in the order of the layer pins. In v0, pin 12 maps to the bottom layer, whereas in v1 pin 12 maps to the top layer.
+Also, currently columns 0 and 1 do not work as these are used for serial input/output. 
+
+The pin layout may be tweaked in `lib/CubePlexer/CubePlexer.hpp`. The pin layout is likely subject to change to fix the issues.
+
+## Acknowledgements
+
+Most work was done by [JuliusR](https://github.com/JuliusR). Thanks!
