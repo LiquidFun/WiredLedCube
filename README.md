@@ -1,4 +1,4 @@
-# ArduinoLightCube
+# Wired LED Cube
 
 A small library for an Arduino Uno for a 3x3x3 LED light cube which has been wired to the GPIO pins.
 It uses the [PlatformIO](https://platformio.org) framework, so it should be fairly portable. 
