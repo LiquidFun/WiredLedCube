@@ -15,9 +15,9 @@ namespace T27
         static constexpr Pin z_pins[2][N]{
             {
                 // PinLayout::v0 (hard-wired)
-                pins[10], // z = 0 (bottom)
+                pins[12], // z = 0 (bottom)
                 pins[11], // z = 1
-                pins[12], // z = 2 (top)
+                pins[10], // z = 2 (top)
             },
             {
                 // PinLayout::v1 (cable plugs; subject to changes)
