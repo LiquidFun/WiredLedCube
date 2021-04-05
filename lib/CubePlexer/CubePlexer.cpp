@@ -13,9 +13,6 @@ namespace T27
 
     void CubePlexer::setup()
     {
-        pinMode(LED_BUILTIN, OUTPUT);
-        digitalWrite(LED_BUILTIN, LOW);
-
         for (int z = 0; z < CubePlexer::N; ++z)
         {
             const Pin &pin = z_pins[z];
@@ -59,25 +56,5 @@ namespace T27
         PORTB = (portb_prev & ~maskb_xyz_e) | portb_next;
 
         SREG = status;
-    }
-
-    void CubePlexer::activate_all_levels() const
-    {
-        for (int z = 0; z < CubePlexer::N; ++z)
-        {
-            activate_level(z);
-            delay(1);
-        }
-    }
-
-    void CubePlexer::highlight(int z_to_be_highlighted)
-    {
-        const Pin &pin = pins[LED_BUILTIN];
-        uint8_t port_offset = get_port_offset(pin.port());
-        for (int z = 0; z < N; ++z)
-        {
-            ports_BD_by_z[z][port_offset] &= ~pin.mask();
-        }
-        ports_BD_by_z[z_to_be_highlighted][port_offset] |= pin.mask();
     }
 } // namespace T27

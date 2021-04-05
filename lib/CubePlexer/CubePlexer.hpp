@@ -77,7 +77,6 @@ namespace T27
             uint8_t port_offset = get_port_offset(pin.port());
             ports_BD_by_z[z][port_offset] ^= pin.mask();
         }
-        void highlight(int z_to_be_highlighted);
 
     private:
         static constexpr uint8_t get_port_offset(const Port &port)

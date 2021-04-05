@@ -20,7 +20,6 @@ void setup()
 
     T27::CubePlexer::setup();
 
-    T27::app.highlight(2);
     start_time = millis();
 }
 
@@ -60,7 +59,11 @@ void loop()
         turn_random_on();
         start_time = millis();
     }
-    T27::app.activate_all_levels();
+    for (int z = 0; z < T27::CubePlexer::N; ++z)
+    {
+        T27::app.activate_level(z);
+        delay(5);
+    }
 }
 
 #ifndef ARDUINO
