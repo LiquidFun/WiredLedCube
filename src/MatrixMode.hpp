@@ -35,16 +35,7 @@ namespace T27
                         bool next_state = (random(0, 5) == 1);
                         for (int z = CubePlexer::N; z >= 1; --z)
                         {
-                            bool curr_state = cube_.is_on(x, y, z - 1);
-                            if (next_state)
-                            {
-                                cube_.on(x, y, z - 1);
-                            }
-                            else
-                            {
-                                cube_.off(x, y, z - 1);
-                            }
-                            next_state = curr_state;
+                            next_state = cube_.exchange(next_state, x, y, z - 1);
                         }
                     }
                 }

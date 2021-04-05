@@ -37,14 +37,8 @@ namespace T27
                 {
                     for (int z = 0; z < CubePlexer::N; ++z)
                     {
-                        if (light_is_on(x, y, z))
-                        {
-                            cube_.on(x, y, z);
-                        }
-                        else
-                        {
-                            cube_.off(x, y, z);
-                        }
+                        bool should_be_on = light_is_on(x, y, z);
+                        cube_.exchange(should_be_on, x, y, z);
                     }
                 }
             }
