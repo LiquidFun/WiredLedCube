@@ -51,5 +51,10 @@ namespace T27
                 start_time_ = millis();
             }
         }
+
+        virtual void update(int /*key*/) override
+        {
+            this->update();
+        }
     }; // class MatrixMode
 } // namespace T27
