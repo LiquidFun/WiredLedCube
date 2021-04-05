@@ -100,6 +100,19 @@ namespace T27
             uint8_t port_offset = get_port_offset(pin.port());
             ports_BD_by_z[z][port_offset] ^= pin.mask();
         }
+        bool exchange(bool should_be_on, int x, int y, int z)
+        {
+            bool was_on = is_on(x, y, z);
+            if (should_be_on)
+            {
+                on(x, y, z);
+            }
+            else
+            {
+                off(x, y, z);
+            }
+            return was_on;
+        }
 
     private:
         const Pin &z_to_pin(int z) const
