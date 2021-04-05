@@ -1,6 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "Pin.hpp"
+#include "PinLayout.hpp"
 
 namespace T27
 {
@@ -9,30 +12,50 @@ namespace T27
     public:
         static constexpr int N = 3;
 
-        static constexpr Pin z_pins[N]{
-            pins[10], // z = 0 (bottom)
-            pins[11], // z = 1
-            pins[12], // z = 2 (top)
-        };
+        static constexpr Pin z_pins[2][N]{
+            {
+                // PinLayout::v0 (hard-wired)
+                pins[12], // z = 0 (bottom)
+                pins[11], // z = 1
+                pins[10], // z = 2 (top)
+            },
+            {
+                // PinLayout::v1 (cable plugs; subject to changes)
+                pins[10], // z = 0 (bottom)
+                pins[11], // z = 1
+                pins[12], // z = 2 (top)
+            }};
 
-        static constexpr Pin yx_pins[CubePlexer::N][CubePlexer::N]{
-            // (viewed from the top. 6 7 8 is the side closer to the USB output)
-            // {  0,       1,       2 } ∋ x
-            {pins[0], pins[1], pins[2]}, // 0 = y
-            {pins[5], pins[4], pins[3]}, // 1 = y
-            {pins[6], pins[7], pins[8]}, // 2 = y
-            // ATTENTION: above coordinate system is left-handed: eˣ × eʸ = −eᶻ
-        };
+        static constexpr Pin yx_pins[2][CubePlexer::N][CubePlexer::N]{
+            {
+                // PinLayout::v0 (hard-wired)
+                // {  0,       1,       2 } ∋ x
+                {pins[0], pins[1], pins[2]}, // 0 = y
+                {pins[5], pins[4], pins[3]}, // 1 = y
+                {pins[6], pins[7], pins[8]}, // 2 = y
+                // (viewed from the top. 6 7 8 is the side closer to the USB output)
+            },
+            {
+                // PinLayout::v1 (cable plugs; subject to changes)
+                // {  0,       1,       2 } ∋ x
+                {pins[9], pins[13], pins[2]}, // 0 = y
+                {pins[5], pins[4], pins[3]},  // 1 = y
+                {pins[6], pins[7], pins[8]},  // 2 = y
+                // (viewed from the top. 6 7 8 is the side closer to the USB output)
+            }};
 
     private:
+        PinLayout layout_;
+
         uint8_t ports_BD_by_z[N][2]{};
 
     public:
-        CubePlexer()
+        CubePlexer(PinLayout layout)
+            : layout_{layout}
         {
             for (int z = 0; z < N; ++z)
             {
-                const Pin &pin = z_pins[z];
+                const Pin &pin = z_to_pin(z);
                 uint8_t port_offset = get_port_offset(pin.port());
                 ports_BD_by_z[z][port_offset] |= pin.mask();
 
@@ -47,7 +70,7 @@ namespace T27
         }
 
     public:
-        static void setup();
+        void setup();
 
         void activate_level(int z_active) const;
         void activate_all_levels() const;
@@ -55,31 +78,40 @@ namespace T27
     public:
         void on(int x, int y, int z)
         {
-            const Pin &pin = yx_pins[y][x];
+            const Pin &pin = xy_to_pin(x, y);
             uint8_t port_offset = get_port_offset(pin.port());
             ports_BD_by_z[z][port_offset] &= ~pin.mask();
         }
         bool is_on(int x, int y, int z)
         {
-            const Pin &pin = yx_pins[y][x];
+            const Pin &pin = xy_to_pin(x, y);
             uint8_t port_offset = get_port_offset(pin.port());
             return !(ports_BD_by_z[z][port_offset] & pin.mask());
         }
         void off(int x, int y, int z)
         {
-            const Pin &pin = yx_pins[y][x];
+            const Pin &pin = xy_to_pin(x, y);
             uint8_t port_offset = get_port_offset(pin.port());
             ports_BD_by_z[z][port_offset] |= pin.mask();
         }
         void toggle(int x, int y, int z)
         {
-            const Pin &pin = yx_pins[y][x];
+            const Pin &pin = xy_to_pin(x, y);
             uint8_t port_offset = get_port_offset(pin.port());
             ports_BD_by_z[z][port_offset] ^= pin.mask();
         }
-        void highlight(int z_to_be_highlighted);
 
     private:
+        const Pin &z_to_pin(int z) const
+        {
+            return z_pins[static_cast<uint8_t>(layout_)][z];
+        }
+
+        const Pin &xy_to_pin(int x, int y) const
+        {
+            return yx_pins[static_cast<uint8_t>(layout_)][y][x];
+        }
+
         static constexpr uint8_t get_port_offset(const Port &port)
         {
             return (port.x() == 'B')
