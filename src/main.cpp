@@ -17,7 +17,6 @@ void setup()
     delay(2000);
 
     Serial.begin(9600L);
-    Serial.println(__AVR_LIBC_VERSION__);
 
     T27::CubePlexer::setup();
 
