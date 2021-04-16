@@ -5,6 +5,7 @@
 #include "FreezeMode.hpp"
 #include "IBlinkMode.hpp"
 #include "MatrixMode.hpp"
+#include "SpeedMode.hpp"
 #include "PinLayout.hpp"
 #include "PlayerMode.hpp"
 
@@ -18,11 +19,14 @@ namespace T27
     CubePlexer cube(layout);
 
     MatrixMode matrix_mode{cube};
+    SpeedMode speed_mode{cube};
     PlayerMode player_mode{cube};
     FreezeMode freeze_mode{cube};
 
     auto modes = make_array<IBlinkMode *>(
         &freeze_mode // 0
+        ,
+        &speed_mode // 1
         ,
         &matrix_mode // 1
         ,
