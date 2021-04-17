@@ -117,8 +117,55 @@ namespace T27
             }
             return was_on;
         }
+        void move_all_by(int by_x, int by_y, int by_z, bool fill_with_on = false) 
+        {
+            for (int z = 0; z < N; ++z)
+            {
+                int adj_z = by_z > 0 ? N - z - 1 : z;
+                int from_z = adj_z - by_z;
+                for (int x = 0; x < N; ++x)
+                {
+                    int adj_x = by_x > 0 ? N - x - 1 : x;
+                    int from_x = adj_x - by_x;
+                    for (int y = 0; y < N; ++y)
+                    {
+                        int adj_y = by_y > 0 ? N - y - 1 : y;
+                        int from_y = adj_y - by_y;
+                        bool fill = fill_with_on;
+                        if (is_inside(from_x, from_y, from_z)) 
+                            fill = is_on(from_x, from_y, from_z);
+                        exchange(fill, adj_x, adj_y, adj_z);
+                    }
+                }
+            }
+        }
+        void set_all_to(bool is_on)
+        {
+            for (int x = 0; x < N; ++x)
+                for (int y = 0; y < N; ++y)
+                    for (int z = 0; z < N; ++z)
+                        exchange(is_on, x, y, z);
+        }
+        void all_on()
+        {
+            set_all_to(true);
+        }
+        void all_off()
+        {
+            set_all_to(false);
+        }
 
     private:
+        inline bool is_inside(int coord)
+        {
+            return 0 <= coord && coord < N;
+        }
+
+        inline bool is_inside(int x, int y, int z)
+        {
+            return is_inside(x) && is_inside(y) && is_inside(z);
+        }
+
         const Pin &z_to_pin(int z) const
         {
             return z_pins[static_cast<uint8_t>(layout_)][z];
