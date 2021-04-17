@@ -15,7 +15,7 @@ namespace T27
     {
     private:
         enum class State {
-            BlockAppears, BlockMovesOut, BlockMovesIn, BlockCrashes, BlockSlidesDown
+            BlockAppears, BlockMovesOut, BlockMovesIn, BlockCrashes, BlockSlidesDown, Blinking
         };
         State state = State::BlockAppears;
 
@@ -28,82 +28,6 @@ namespace T27
         const unsigned TARGET_MS_PER_FRAME{40};
         const unsigned ACC_CYCLES{20};
         unsigned long interval = START_MS_PER_FRAME;
-
-        void block_appears() 
-        {
-            for (int z = 0; z < CubePlexer::N; ++z)
-            {
-                if (cube_.is_on(0, 0, z))
-                    continue;
-                for (int x = 0; x < CubePlexer::N; ++x)
-                {
-                    for (int y = 0; y < CubePlexer::N; ++y)
-                    {
-                        cube_.on(x, y, z);
-                    }
-                }
-                return;
-            }
-            state = State::BlockMovesOut;
-        }
-
-        void block_moves_out() 
-        {
-            for (int y = 0; y < CubePlexer::N; ++y)
-            {
-                if (cube_.is_off(0, y, 0))
-                    continue;
-                for (int x = 0; x < CubePlexer::N; ++x)
-                {
-                    for (int z = 0; z < CubePlexer::N; ++z)
-                    {
-                        cube_.off(x, y, z);
-                    }
-                }
-                return;
-            }
-            current_cycle_++;
-            state = State::BlockMovesIn;
-        }
-        void block_moves_in() 
-        {
-            for (int y = 0; y < CubePlexer::N; ++y)
-            {
-                if (cube_.is_on(0, y, 0))
-                    continue;
-                for (int x = 0; x < CubePlexer::N; ++x)
-                {
-                    for (int z = 0; z < CubePlexer::N; ++z)
-                    {
-                        cube_.on(x, y, z);
-                    }
-                }
-                return;
-            }
-            if (current_cycle_ < ACC_CYCLES)
-                state = State::BlockMovesOut;
-            else
-                state = State::BlockCrashes;
-        }
-
-        void block_crashes() 
-        {
-            for (int y = 0; y < CubePlexer::N - 1; ++y)
-            {
-                if (cube_.is_off(0, y, 0))
-                    continue;
-                for (int x = 0; x < CubePlexer::N; ++x)
-                {
-                    for (int z = 0; z < CubePlexer::N; ++z)
-                    {
-                        cube_.off(x, y, z);
-                    }
-                }
-                return;
-            }
-            current_cycle_ = 0;
-            state = State::BlockSlidesDown;
-        }
 
         void block_slides_down() 
         {
@@ -119,7 +43,7 @@ namespace T27
                     return;
                 }
             }
-            state = State::BlockAppears;
+            state = State::Blinking;
         }
 
         double next_interval_time(int cycle) 
@@ -140,19 +64,52 @@ namespace T27
             {
                 switch(state) {
                     case State::BlockAppears:
-                        block_appears();
+                        current_cycle_ = 0;
+                        if (cube_.is_on(0, 0, CubePlexer::N - 1))
+                            state = State::BlockMovesOut;
+                        else
+                            cube_.move_all_by(0, 0, 1, true);
                         break;
-                    case State::BlockMovesIn:
-                        block_moves_in();
-                        break;
+
                     case State::BlockMovesOut:
-                        block_moves_out();
+                        if (cube_.is_off(0, CubePlexer::N - 1, CubePlexer::N - 1)) 
+                        {
+                            state = State::BlockMovesIn;
+                            current_cycle_++;
+                        }
+                        else
+                            cube_.move_all_by(0, 1, 0, false);
                         break;
+
+                    case State::BlockMovesIn:
+                        if (cube_.is_on(0, CubePlexer::N - 1, CubePlexer::N - 1))
+                            state = (current_cycle_ < ACC_CYCLES
+                                ? State::BlockMovesOut
+                                : State::BlockCrashes);
+                        else
+                            cube_.move_all_by(0, 1, 0, true);
+                        break;
+
                     case State::BlockCrashes:
-                        block_crashes();
+                        current_cycle_ = 0;
+                        if (cube_.is_off(0, CubePlexer::N - 2, CubePlexer::N - 1)) 
+                            state = State::BlockSlidesDown;
+                        else
+                            cube_.move_all_by(0, 1, 0, false);
                         break;
+
                     case State::BlockSlidesDown:
                         block_slides_down();
+                        break;
+
+                    case State::Blinking:
+                        current_cycle_++;
+                        if (current_cycle_ % 5 == 0)
+                            state = State::BlockAppears;
+                        else if (current_cycle_ % 2 == 0)
+                            cube_.all_off();
+                        else
+                            cube_.all_on();
                         break;
                 }
                 start_time_ = millis();
