@@ -119,22 +119,27 @@ namespace T27
         }
         void move_all_by(int by_x, int by_y, int by_z, bool fill_with_on = false) 
         {
+            // Moves all LED states by the given amount.
+            // To make sure that no data is lost, each target variable
+            // is reversed if needed. Then the LED coordinate is computed
+            // which should take the target's place. If it doesn't exist,
+            // then use the fill_with_on variable.
             for (int z = 0; z < N; ++z)
             {
-                int adj_z = by_z > 0 ? N - z - 1 : z;
-                int from_z = adj_z - by_z;
+                int target_z = by_z > 0 ? N - z - 1 : z;
+                int from_z = target_z - by_z;
                 for (int x = 0; x < N; ++x)
                 {
-                    int adj_x = by_x > 0 ? N - x - 1 : x;
-                    int from_x = adj_x - by_x;
+                    int target_x = by_x > 0 ? N - x - 1 : x;
+                    int from_x = target_x - by_x;
                     for (int y = 0; y < N; ++y)
                     {
-                        int adj_y = by_y > 0 ? N - y - 1 : y;
-                        int from_y = adj_y - by_y;
+                        int target_y = by_y > 0 ? N - y - 1 : y;
+                        int from_y = target_y - by_y;
                         bool fill = fill_with_on;
                         if (is_inside(from_x, from_y, from_z)) 
                             fill = is_on(from_x, from_y, from_z);
-                        exchange(fill, adj_x, adj_y, adj_z);
+                        exchange(fill, target_x, target_y, target_z);
                     }
                 }
             }
@@ -156,12 +161,12 @@ namespace T27
         }
 
     private:
-        inline bool is_inside(int coord)
+        bool is_inside(int coord)
         {
             return 0 <= coord && coord < N;
         }
 
-        inline bool is_inside(int x, int y, int z)
+        bool is_inside(int x, int y, int z)
         {
             return is_inside(x) && is_inside(y) && is_inside(z);
         }

@@ -31,6 +31,10 @@ namespace T27
 
         void block_slides_down() 
         {
+            // Pattern shown here (# is on, . is off):
+            // #..      ...      ...
+            // #..  ->  #..  ->  ...
+            // #..      ##.      ###
             for (int z = CubePlexer::N - 1; z >= 1; --z)
             {
                 if (cube_.is_on(0, CubePlexer::N - 1, z)) 
@@ -38,7 +42,7 @@ namespace T27
                     for (int x = 0; x < CubePlexer::N; ++x)
                     {
                         cube_.off(x, CubePlexer::N - 1, z);
-                        cube_.on(x, CubePlexer::N - z, 0);
+                        cube_.on(x, z - 1, 0);
                     }
                     return;
                 }
