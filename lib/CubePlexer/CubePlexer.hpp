@@ -88,6 +88,10 @@ namespace T27
             uint8_t port_offset = get_port_offset(pin.port());
             return !(ports_BD_by_z[z][port_offset] & pin.mask());
         }
+        bool is_off(int x, int y, int z)
+        {
+            return !is_on(x, y, z);
+        }
         void off(int x, int y, int z)
         {
             const Pin &pin = xy_to_pin(x, y);
@@ -113,8 +117,60 @@ namespace T27
             }
             return was_on;
         }
+        void move_all_by(int by_x, int by_y, int by_z, bool fill_with_on = false) 
+        {
+            // Moves all LED states by the given amount.
+            // To make sure that no data is lost, each target variable
+            // is reversed if needed. Then the LED coordinate is computed
+            // which should take the target's place. If it doesn't exist,
+            // then use the fill_with_on variable.
+            for (int z = 0; z < N; ++z)
+            {
+                int target_z = by_z > 0 ? N - z - 1 : z;
+                int from_z = target_z - by_z;
+                for (int x = 0; x < N; ++x)
+                {
+                    int target_x = by_x > 0 ? N - x - 1 : x;
+                    int from_x = target_x - by_x;
+                    for (int y = 0; y < N; ++y)
+                    {
+                        int target_y = by_y > 0 ? N - y - 1 : y;
+                        int from_y = target_y - by_y;
+                        bool fill = fill_with_on;
+                        if (is_inside(from_x, from_y, from_z)) 
+                            fill = is_on(from_x, from_y, from_z);
+                        exchange(fill, target_x, target_y, target_z);
+                    }
+                }
+            }
+        }
+        void set_all_to(bool is_on)
+        {
+            for (int x = 0; x < N; ++x)
+                for (int y = 0; y < N; ++y)
+                    for (int z = 0; z < N; ++z)
+                        exchange(is_on, x, y, z);
+        }
+        void all_on()
+        {
+            set_all_to(true);
+        }
+        void all_off()
+        {
+            set_all_to(false);
+        }
 
     private:
+        bool is_inside(int coord)
+        {
+            return 0 <= coord && coord < N;
+        }
+
+        bool is_inside(int x, int y, int z)
+        {
+            return is_inside(x) && is_inside(y) && is_inside(z);
+        }
+
         const Pin &z_to_pin(int z) const
         {
             return z_pins[static_cast<uint8_t>(layout_)][z];

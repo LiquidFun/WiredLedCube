@@ -41,8 +41,9 @@ See below for key-bindings in interactive mode.
 | key | effect                 |
 | --- | ---------------------- |
 |   0 | switch to `FreezeMode` |
-|   1 | switch to `MatrixMode` |
-|   2 | switch to `PlayerMode` |
+|   1 | switch to `SpeedMode` |
+|   2 | switch to `MatrixMode` |
+|   3 | switch to `PlayerMode` |
 
 ### `PlayerMode` key bindings:
 
